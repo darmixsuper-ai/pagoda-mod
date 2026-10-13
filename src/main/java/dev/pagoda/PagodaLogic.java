@@ -115,9 +115,9 @@ public final class PagodaLogic {
 		if (moved > 0) {
 			Component name = stack.getHoverName();
 			stack.shrink(moved);
-			player.displayClientMessage(Component.literal("+" + moved + " ").withStyle(ChatFormatting.GREEN)
+			player.sendOverlayMessage(Component.literal("+" + moved + " ").withStyle(ChatFormatting.GREEN)
 					.append(name.copy().withStyle(ChatFormatting.WHITE))
-					.append(Component.literal(" → Pagoda-Kiste  (" + (have + moved) + "/" + target + ")").withStyle(ChatFormatting.GOLD)), true);
+					.append(Component.literal(" → Pagoda-Kiste  (" + (have + moved) + "/" + target + ")").withStyle(ChatFormatting.GOLD)));
 		}
 		return moved;
 	}

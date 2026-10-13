@@ -2,6 +2,8 @@ package dev.pagoda;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -14,6 +16,16 @@ public final class PagodaList {
 
 	private static void add(Item item, int count) {
 		TARGETS.merge(item, count, Integer::sum);
+	}
+
+	/** Fuer Items, die es in dieser Version nicht als eigenes Feld in Items gibt. */
+	private static void addId(String id, int count) {
+		Item item = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(id));
+		if (item == null || item == Items.AIR) {
+			PagodaMod.LOGGER.warn("Pagoda: Item {} nicht gefunden", id);
+			return;
+		}
+		add(item, count);
 	}
 
 	static {
@@ -65,7 +77,7 @@ public final class PagodaList {
 		add(Items.GLASS_PANE, 192);
 		add(Items.CAMPFIRE, 16);
 		add(Items.TORCH, 4);
-		add(Items.BLUE_CANDLE, 12);
+		addId("blue_candle", 12);
 		add(Items.IRON_CHAIN, 2);
 		// Truhen und Arbeitsbloecke
 		add(Items.CHEST, 129);
@@ -82,19 +94,19 @@ public final class PagodaList {
 		add(Items.ANVIL, 4);
 		add(Items.ENCHANTING_TABLE, 1);
 		// Teppich und Wolle
-		add(Items.WHITE_CARPET, 24);
-		add(Items.LIME_CARPET, 28);
-		add(Items.PINK_CARPET, 4);
-		add(Items.PURPLE_CARPET, 16);
-		add(Items.RED_CARPET, 16);
-		add(Items.BLACK_CARPET, 32);
-		add(Items.BLACK_WOOL, 4);
+		addId("white_carpet", 24);
+		addId("lime_carpet", 28);
+		addId("pink_carpet", 4);
+		addId("purple_carpet", 16);
+		addId("red_carpet", 16);
+		addId("black_carpet", 32);
+		addId("black_wool", 4);
 		// Deko
 		add(Items.FLOWER_POT, 52);
 		add(Items.GLOW_ITEM_FRAME, 32);
 		add(Items.ITEM_FRAME, 24);
 		add(Items.ARMOR_STAND, 24);
-		add(Items.BLUE_BED, 1);
+		addId("blue_bed", 1);
 		add(Items.DRAGON_HEAD, 2);
 		add(Items.SPYGLASS, 4);
 		add(Items.COMPASS, 4);

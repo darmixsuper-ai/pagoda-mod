@@ -12,6 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class PagodaMod implements ModInitializer {
+	public static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("pagoda");
+
 	@Override
 	public void onInitialize() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->

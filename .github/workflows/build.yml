@@ -29,15 +29,15 @@ jobs:
           echo "API=$API" >> "$GITHUB_ENV"
           gradle build --no-daemon --console=plain -Pfabric_api_version=$API > /tmp/build.log 2>&1
           echo "code=$?" >> "$GITHUB_OUTPUT"
-      - name: API-Infos (nur bei Fehler)
-        if: steps.build.outputs.code != '0'
+      - name: API-Infos
+        if: always()
         run: |
           mkdir -p out
           : > out/api.txt
           for jar in $(find ~/.gradle/caches /home/runner/work -name "*.jar" 2>/dev/null | grep -i minecraft | grep -v sources); do
             if unzip -l "$jar" 2>/dev/null | grep -q "net/minecraft/world/entity/item/ItemEntity.class"; then
               echo "== $jar" >> out/api.txt
-              for c in net.minecraft.world.item.component.ItemContainerContents net.minecraft.world.entity.item.ItemEntity net.minecraft.world.item.ItemStack net.minecraft.server.level.ServerPlayer net.minecraft.world.entity.player.Player net.minecraft.world.entity.LivingEntity net.minecraft.commands.CommandSourceStack net.minecraft.world.level.Level; do
+              for c in net.minecraft.world.item.component.ItemContainerContents net.minecraft.world.entity.item.ItemEntity net.minecraft.world.item.ItemStack net.minecraft.server.level.ServerPlayer net.minecraft.world.entity.player.Player net.minecraft.world.entity.LivingEntity net.minecraft.commands.CommandSourceStack net.minecraft.world.level.Level net.minecraft.world.item.Items net.minecraft.core.registries.BuiltInRegistries net.minecraft.resources.Identifier net.minecraft.core.DefaultedRegistry; do
                 echo "--- $c" >> out/api.txt
                 javap -cp "$jar" "$c" >> out/api.txt 2>&1
               done
