@@ -1,0 +1,70 @@
+name: build
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.1'
+      - name: Bauen
+        id: build
+        run: |
+          set +e
+          MC=26.2
+          API=$(curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | python3 -c "
+          import sys,re
+          v=[x for x in re.findall(r'<version>([^<]+)</version>',sys.stdin.read()) if x.endswith('+$MC')]
+          print(v[-1] if v else '')")
+          echo "API=$API" >> "$GITHUB_ENV"
+          gradle build --no-daemon --console=plain -Pfabric_api_version=$API > /tmp/build.log 2>&1
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - name: API-Infos (nur bei Fehler)
+        if: steps.build.outputs.code != '0'
+        run: |
+          mkdir -p out
+          : > out/api.txt
+          for jar in $(find ~/.gradle/caches /home/runner/work -name "*.jar" 2>/dev/null | grep -i minecraft | grep -v sources); do
+            if unzip -l "$jar" 2>/dev/null | grep -q "net/minecraft/world/entity/item/ItemEntity.class"; then
+              echo "== $jar" >> out/api.txt
+              for c in net.minecraft.world.item.component.ItemContainerContents net.minecraft.world.entity.item.ItemEntity net.minecraft.world.item.ItemStack net.minecraft.server.level.ServerPlayer net.minecraft.world.entity.player.Player net.minecraft.world.entity.LivingEntity net.minecraft.commands.CommandSourceStack net.minecraft.world.level.Level; do
+                echo "--- $c" >> out/api.txt
+                javap -cp "$jar" "$c" >> out/api.txt 2>&1
+              done
+              break
+            fi
+          done
+      - name: Sammeln
+        if: always()
+        run: |
+          mkdir -p out
+          tail -250 /tmp/build.log > out/build.log
+          echo "exit=${{ steps.build.outputs.code }} api=$API" > out/status.txt
+          if [ "${{ steps.build.outputs.code }}" = "0" ]; then
+            JAR=$(ls build/libs/pagoda-mod-*.jar | grep -v sources | head -1)
+            cp "$JAR" out/pagoda-mod-26.2.jar
+          fi
+          cd out
+          git init -q -b logs
+          git config user.name actions
+          git config user.email actions@users.noreply.github.com
+          git add .
+          git commit -qm "logs"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" logs
+      - name: Release
+        if: steps.build.outputs.code == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest -y --cleanup-tag --repo "${{ github.repository }}" || true
+          gh release create latest out/pagoda-mod-26.2.jar --repo "${{ github.repository }}" --target main --title "Pagoda Sammler (neueste Version)" --notes "Fabric-Mod fuer Minecraft 26.2. Die .jar in den mods-Ordner legen, Fabric API wird gebraucht."

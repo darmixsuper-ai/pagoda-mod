@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "pagoda",
+	"version": "${version}",
+	"name": "Pagoda Sammler",
+	"description": "Benenne eine Shulker-Kiste in 'Pagoda' um: gefarmte Pagoda-Materialien landen beim Aufsammeln direkt darin. /pagoda zeigt, was noch fehlt.",
+	"authors": ["Ayri"],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["dev.pagoda.PagodaMod"]
+	},
+	"mixins": ["pagoda.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
