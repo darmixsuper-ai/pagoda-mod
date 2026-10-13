@@ -1,9 +1,9 @@
-package dev.pagoda.client;
+package dev.gatherlist;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import dev.pagoda.PagodaLogic;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -35,7 +35,7 @@ import net.minecraft.world.phys.HitResult;
  * Merkt sich, was in den Truhen liegt, die du geoeffnet hast (pro Server bzw. Welt).
  * Alles laeuft nur bei dir im Spiel, der Server merkt davon nichts.
  */
-public final class Lager {
+public final class Storage {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	/** Welt/Server -> Truhe -> Item-ID -> Anzahl */
 	private static Map<String, Map<String, Map<String, Integer>>> data = new HashMap<>();
@@ -43,38 +43,34 @@ public final class Lager {
 	private static boolean dirty;
 	private static int cleanupTimer;
 
-	private Lager() {
-	}
-
-	private static Path file() {
-		return FabricLoader.getInstance().getConfigDir().resolve("pagoda-lager.json");
+	private Storage() {
 	}
 
 	public static void load() {
-		try {
-			Path p = file();
-			if (Files.exists(p)) {
-				Map<String, Map<String, Map<String, Integer>>> d = GSON.fromJson(Files.readString(p),
-						new TypeToken<Map<String, Map<String, Map<String, Integer>>>>() { }.getType());
-				if (d != null) {
-					data = d;
+		java.lang.reflect.Type type = new TypeToken<Map<String, Map<String, Map<String, Integer>>>>() { }.getType();
+		Map<String, Map<String, Map<String, Integer>>> d = Json.read("chests.json", type);
+		if (d == null) {
+			// Uebernimmt die Truhen aus der alten Pagoda-Version
+			try {
+				Path old = FabricLoader.getInstance().getConfigDir().resolve("pagoda-lager.json");
+				if (Files.exists(old)) {
+					d = GSON.fromJson(Files.readString(old), type);
 				}
+			} catch (Exception e) {
+				GatherlistClient.LOGGER.warn("Gatherlist: alte Truhen konnten nicht uebernommen werden", e);
 			}
-		} catch (Exception e) {
-			dev.pagoda.PagodaMod.LOGGER.warn("Pagoda: Lager konnte nicht geladen werden", e);
+		}
+		if (d != null) {
+			data = d;
 		}
 	}
 
 	public static void save() {
-		try {
-			Files.writeString(file(), GSON.toJson(data));
-			dirty = false;
-		} catch (Exception e) {
-			dev.pagoda.PagodaMod.LOGGER.warn("Pagoda: Lager konnte nicht gespeichert werden", e);
-		}
+		Json.write("chests.json", data);
+		dirty = false;
 	}
 
-	static String world(Minecraft mc) {
+	public static String world(Minecraft mc) {
 		ServerData sd = mc.getCurrentServer();
 		if (sd != null) {
 			return "server:" + sd.ip;
@@ -85,11 +81,11 @@ public final class Lager {
 		return "unbekannt";
 	}
 
-	static Map<String, Map<String, Integer>> chests(Minecraft mc) {
+	public static Map<String, Map<String, Integer>> chests(Minecraft mc) {
 		return data.computeIfAbsent(world(mc), k -> new HashMap<>());
 	}
 
-	static void forget(Minecraft mc) {
+	public static void forget(Minecraft mc) {
 		data.remove(world(mc));
 		save();
 	}
@@ -195,8 +191,8 @@ public final class Lager {
 				continue;
 			}
 			counts.merge(id(st.getItem()), st.getCount(), Integer::sum);
-			if (PagodaLogic.isShulker(st)) {
-				for (ItemStack inner : PagodaLogic.contents(st)) {
+			if (Counter.isShulker(st)) {
+				for (ItemStack inner : Counter.contents(st)) {
 					if (!inner.isEmpty()) {
 						counts.merge(id(inner.getItem()), inner.getCount(), Integer::sum);
 					}
@@ -210,13 +206,13 @@ public final class Lager {
 		}
 	}
 
-	static String id(Item item) {
+	public static String id(Item item) {
 		return BuiltInRegistries.ITEM.getKey(item).toString();
 	}
 
 	/** Wie viele du insgesamt hast: Inventar (mit Shulker-Kisten) + alle gemerkten Truhen. */
-	static int have(Minecraft mc, Item item) {
-		int n = PagodaLogic.countContainer(mc.player.getInventory(), item);
+	public static int have(Minecraft mc, Item item) {
+		int n = Counter.countContainer(mc.player.getInventory(), item);
 		String id = id(item);
 		for (Map<String, Integer> c : chests(mc).values()) {
 			n += c.getOrDefault(id, 0);

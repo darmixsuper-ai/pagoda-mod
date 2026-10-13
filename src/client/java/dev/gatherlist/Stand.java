@@ -1,6 +1,5 @@
-package dev.pagoda.client;
+package dev.gatherlist;
 
-import dev.pagoda.PagodaList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/** Der aktuelle Stand aller Pagoda-Materialien, fuer Fenster und HUD. */
+/** Der aktuelle Stand des aktiven Projekts, fuer Fenster und HUD. */
 public final class Stand {
 	public record Entry(ItemStack icon, String name, String id, int have, int need) {
 		public boolean done() {
@@ -32,9 +31,9 @@ public final class Stand {
 		}
 		List<Entry> list = new ArrayList<>();
 		int d = 0;
-		for (Map.Entry<Item, Integer> e : PagodaList.TARGETS.entrySet()) {
+		for (Map.Entry<Item, Integer> e : Projects.resolved(Projects.active()).entrySet()) {
 			ItemStack icon = new ItemStack(e.getKey());
-			Entry en = new Entry(icon, icon.getHoverName().getString(), Lager.id(e.getKey()), Lager.have(mc, e.getKey()), e.getValue());
+			Entry en = new Entry(icon, icon.getHoverName().getString(), Projects.id(e.getKey()), Storage.have(mc, e.getKey()), e.getValue());
 			if (en.done()) {
 				d++;
 			}
@@ -53,6 +52,6 @@ public final class Stand {
 	}
 
 	public static int total() {
-		return PagodaList.TARGETS.size();
+		return entries.size();
 	}
 }

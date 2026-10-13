@@ -6,7 +6,7 @@ loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"pagoda" {
+		"gatherlist" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}

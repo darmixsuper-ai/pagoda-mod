@@ -1,25 +1,21 @@
 {
 	"schemaVersion": 1,
-	"id": "pagoda",
+	"id": "gatherlist",
 	"version": "${version}",
-	"name": "Pagoda Sammler",
-	"description": "Taste rechts neben der 0 (?) öffnet ein Fenster mit allen Pagoda-Materialien, die noch fehlen. Zählt Inventar, Shulker-Kisten und alle Truhen, die du geöffnet hast. Funktioniert auch auf fremden Servern.",
-	"authors": [
-		"Ayri"
-	],
-	"license": "MIT",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"dev.pagoda.PagodaMod"
-		],
-		"client": [
-			"dev.pagoda.client.PagodaClient"
-		]
+	"name": "Gatherlist",
+	"description": "Material checklists for your builds. Make a list, gather, and always see what's still missing - in a small window and on your HUD. Counts your inventory, shulker boxes and every chest you open. Works on any server.",
+	"authors": ["Ayri"],
+	"contact": {
+		"homepage": "https://github.com/darmixsuper-ai/pagoda-mod",
+		"sources": "https://github.com/darmixsuper-ai/pagoda-mod",
+		"issues": "https://github.com/darmixsuper-ai/pagoda-mod/issues"
 	},
-	"mixins": [
-		"pagoda.mixins.json"
-	],
+	"license": "MIT",
+	"icon": "assets/gatherlist/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["dev.gatherlist.GatherlistClient"]
+	},
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~${minecraft_version}",

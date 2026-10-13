@@ -30,7 +30,7 @@ jobs:
           gradle build --no-daemon --console=plain -Pfabric_api_version=$API > /tmp/build.log 2>&1
           echo "code=$?" >> "$GITHUB_OUTPUT"
       - name: API-Infos
-        if: always()
+        if: steps.build.outputs.code != '0'
         run: |
           mkdir -p out
           : > out/api.txt
@@ -44,6 +44,7 @@ jobs:
               break
             fi
           done
+          for jar in $(find ~/.gradle/caches -name 'fabric-key-*.jar' 2>/dev/null | head -2); do echo "== $jar" >> out/api.txt; unzip -l "$jar" | grep -i class >> out/api.txt; done
       - name: Sammeln
         if: always()
         run: |
@@ -51,8 +52,8 @@ jobs:
           tail -250 /tmp/build.log > out/build.log
           echo "exit=${{ steps.build.outputs.code }} api=$API" > out/status.txt
           if [ "${{ steps.build.outputs.code }}" = "0" ]; then
-            JAR=$(ls build/libs/pagoda-mod-*.jar | grep -v sources | head -1)
-            cp "$JAR" out/pagoda-mod-26.2.jar
+            JAR=$(ls build/libs/gatherlist-*.jar | grep -v sources | head -1)
+            cp "$JAR" out/gatherlist-26.2.jar
           fi
           cd out
           git init -q -b logs
@@ -67,4 +68,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest -y --cleanup-tag --repo "${{ github.repository }}" || true
-          gh release create latest out/pagoda-mod-26.2.jar --repo "${{ github.repository }}" --target main --title "Pagoda Sammler (neueste Version)" --notes "Fabric-Mod fuer Minecraft 26.2. Die .jar in den mods-Ordner legen, Fabric API wird gebraucht."
+          gh release create latest out/gatherlist-26.2.jar --repo "${{ github.repository }}" --target main --title "Gatherlist for Minecraft 26.2" --notes-file .github/release-notes.md
