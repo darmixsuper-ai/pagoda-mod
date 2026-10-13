@@ -34,13 +34,13 @@ public final class PagodaLogic {
 		return name != null && name.getString().toLowerCase(Locale.ROOT).contains("pagoda");
 	}
 
-	private static NonNullList<ItemStack> contents(ItemStack box) {
+	public static NonNullList<ItemStack> contents(ItemStack box) {
 		NonNullList<ItemStack> items = NonNullList.withSize(SHULKER_SLOTS, ItemStack.EMPTY);
 		box.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(items);
 		return items;
 	}
 
-	private static int countInBox(ItemStack box, Item item) {
+	public static int countInBox(ItemStack box, Item item) {
 		int n = 0;
 		for (ItemStack s : contents(box)) {
 			if (s.is(item)) {
@@ -127,7 +127,7 @@ public final class PagodaLogic {
 		return countContainer(player.getInventory(), item) + countContainer(player.getEnderChestInventory(), item);
 	}
 
-	private static int countContainer(Container c, Item item) {
+	public static int countContainer(Container c, Item item) {
 		int n = 0;
 		for (int i = 0; i < c.getContainerSize(); i++) {
 			ItemStack s = c.getItem(i);
