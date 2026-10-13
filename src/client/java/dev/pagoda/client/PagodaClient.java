@@ -37,7 +37,7 @@ public class PagodaClient implements ClientModInitializer {
 
 	private static void renderHud(GuiGraphicsExtractor g) {
 		Minecraft mc = Minecraft.getInstance();
-		if (!Settings.hud() || mc.player == null || mc.options.hideGui || mc.gui.screen() instanceof PagodaScreen) {
+		if (!Settings.hud() || mc.player == null || mc.gui.screen() instanceof PagodaScreen) {
 			return;
 		}
 		int w = 160;
